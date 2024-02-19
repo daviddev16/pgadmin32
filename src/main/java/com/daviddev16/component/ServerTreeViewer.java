@@ -1,0 +1,188 @@
+package com.daviddev16.component;
+
+import java.awt.Cursor;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+
+import com.daviddev16.core.DatabaseDataObject;
+import com.daviddev16.core.ResourcedEntityDataNode;
+import com.daviddev16.core.component.TreeViewer;
+import com.daviddev16.core.component.event.TreeNodeInteractEvent;
+import com.daviddev16.core.component.event.TreeNodeInteractionType;
+import com.daviddev16.core.postgres.PostgresObjectMetadata;
+import com.daviddev16.event.server.ConstraintsGroupNodeInteractEvent;
+import com.daviddev16.event.server.DatabaseNodeInteractEvent;
+import com.daviddev16.event.server.IndexGroupNodeInteractEvent;
+import com.daviddev16.event.server.SchemaGroupNodeInteractEvent;
+import com.daviddev16.event.server.SchemaNodeInteractEvent;
+import com.daviddev16.event.server.SequenceGroupNodeInteractEvent;
+import com.daviddev16.event.server.ServerNodeInteractEvent;
+import com.daviddev16.event.server.TableNodeInteractEvent;
+import com.daviddev16.node.Database;
+import com.daviddev16.node.Schema;
+import com.daviddev16.node.Server;
+import com.daviddev16.node.Table;
+import com.daviddev16.node.group.ConstraintsGroup;
+import com.daviddev16.node.group.IndexesGroup;
+import com.daviddev16.node.group.SchemaGroup;
+import com.daviddev16.node.group.SequencesGroup;
+import com.daviddev16.node.group.ServersHierachyGroup;
+import com.daviddev16.service.EventManager;
+import com.daviddev16.service.ServicesFacade;
+import com.daviddev16.util.TreeExpansionUtil;
+
+public class ServerTreeViewer extends TreeViewer {
+
+	private static final long serialVersionUID = 2647424773078682960L;
+
+	private final EventManager eventManager = 
+			ServicesFacade.getServices().getEventManager();
+
+	private AtomicReference<DatabaseDataObject> lastSelectedDatabaseDataObject;
+	private DefaultMutableTreeNode rootTreeNode;
+	private ResourcedEntityDataNode lastSelectedNode;
+	public TreeExpansionUtil expansionUtil;
+	
+	@Override
+	public void initilize() {
+		expansionUtil = new TreeExpansionUtil(this);
+		lastSelectedDatabaseDataObject = new AtomicReference<DatabaseDataObject>();
+		rootTreeNode = createTreeNodeByEntityData(new ServersHierachyGroup());
+		getDefaultModel().setRoot(rootTreeNode);
+
+		MouseListener ml = new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if(SwingUtilities.isRightMouseButton(e)){
+					int selRow = getRowForLocation(e.getX(), e.getY());
+					TreePath selPath = getPathForLocation(e.getX(), e.getY());
+					setSelectionPath(selPath); 
+					if (selRow>-1){
+						setSelectionRow(selRow); 
+					}
+				}
+			}
+		};
+		addMouseListener(ml);
+
+		addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3) {
+
+					DefaultMutableTreeNode clickedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
+					if (clickedNode == null)
+						return;
+
+					ResourcedEntityDataNode entityDataNode = (ResourcedEntityDataNode) clickedNode.getUserObject();
+
+					if (entityDataNode instanceof DatabaseDataObject) {
+						String text = PostgresObjectMetadata.printMetadata(entityDataNode.getNodeIdentifier(), 
+								((DatabaseDataObject)entityDataNode).getPostgresObjectMetadata());
+						JOptionPane.showMessageDialog(null, text);
+						requestFocus();
+					}
+
+					return;
+				}
+
+				super.mousePressed(e);
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() != 2) {
+					return;
+				}
+				DefaultMutableTreeNode clickedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
+				if (clickedNode == null) {
+					return;
+				}
+				ResourcedEntityDataNode entityDataNode = (ResourcedEntityDataNode) clickedNode.getUserObject();
+				try {
+					if (entityDataNode instanceof DatabaseDataObject) {
+						if (((DatabaseDataObject)entityDataNode).isLoaded()) {
+							//return;
+						}	
+					}
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					handleDoubleClickTreeNodeEvent(entityDataNode, clickedNode);
+					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+	}
+
+	private void handleDoubleClickTreeNodeEvent(ResourcedEntityDataNode entityDataNode, 
+												DefaultMutableTreeNode clickedTreeNode) throws SQLException 
+	{
+		TreeNodeInteractEvent treeNodeInteractEvent = null;
+		if (entityDataNode instanceof Server)
+			treeNodeInteractEvent = 
+				new ServerNodeInteractEvent(this, clickedTreeNode);		
+		else if (entityDataNode instanceof Database)	
+			treeNodeInteractEvent =
+				new DatabaseNodeInteractEvent(this, clickedTreeNode);
+		else if (entityDataNode instanceof Schema) 
+			treeNodeInteractEvent = 
+				new SchemaNodeInteractEvent(this, clickedTreeNode);
+		else if (entityDataNode instanceof Table)
+			treeNodeInteractEvent 
+			= new TableNodeInteractEvent(this, clickedTreeNode);
+		else if (entityDataNode instanceof SchemaGroup) 
+			treeNodeInteractEvent = 
+				new SchemaGroupNodeInteractEvent(ServerTreeViewer.this, clickedTreeNode);
+		else if (entityDataNode instanceof SequencesGroup) 
+			treeNodeInteractEvent = 
+				new SequenceGroupNodeInteractEvent(ServerTreeViewer.this, clickedTreeNode);
+		else if (entityDataNode instanceof IndexesGroup) 
+			treeNodeInteractEvent = 
+				new IndexGroupNodeInteractEvent(ServerTreeViewer.this, clickedTreeNode);
+		else if (entityDataNode instanceof ConstraintsGroup) 
+			treeNodeInteractEvent = 
+				new ConstraintsGroupNodeInteractEvent(ServerTreeViewer.this, clickedTreeNode);
+		
+		/* objeto não foi mapeado / serve como um dummyObject */
+		if (treeNodeInteractEvent == null)
+			return;
+
+		if (!(entityDataNode instanceof Server)) {
+			lastSelectedDatabaseDataObject.set((DatabaseDataObject) entityDataNode);
+		}
+		treeNodeInteractEvent.setTreeNodeInteractionType(TreeNodeInteractionType.DOUBLE_CLICK_EVENT);
+		eventManager.dispatchEvent(treeNodeInteractEvent);
+	}
+
+	public DatabaseDataObject getLastSelectedDatabaseDataObject() {
+		return lastSelectedDatabaseDataObject.get();
+	}
+	
+	public void reloadAndRestoreExpandedState(DefaultMutableTreeNode clickedTreeNode) {
+		expandPath(new TreePath(clickedTreeNode.getPath()));
+		String originalState = expansionUtil.getExpansionState();
+		getDefaultModel().reload();
+		expansionUtil.setExpansionState(originalState);
+	}
+	
+	public void addServerToTree(Server server) {
+		DefaultMutableTreeNode serverNode = createTreeNodeByEntityData(server);
+		rootTreeNode.insert(serverNode, 0);
+		getDefaultModel().reload();
+	}
+	
+	public ResourcedEntityDataNode getLastSelected() {
+		return lastSelectedNode;
+	}
+
+}
