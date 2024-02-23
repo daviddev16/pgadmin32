@@ -18,7 +18,7 @@ public class StyleManager {
 
 	public StyleManager() {
 		styleConfiguratorsMap = new HashMap<String, StyleConfigurator>();
-		FlatLaf.registerCustomDefaultsSource("com.daviddev16.flatlaf.themes");
+		FlatLaf.registerCustomDefaultsSource("com.daviddev16.themes.flatlaf");
 	}
 	
 	public synchronized void configureStyle(StyleConfigurator styleConfigurator) {
@@ -30,7 +30,7 @@ public class StyleManager {
 		}
 		styleConfigurator.done();
 		ServicesFacade.getServices().getEventManager()
-			.dispatchEvent(new ChangedStyleStateEvent(styleConfigurator));
+			.dispatchEvent(new ChangedStyleStateEvent(styleConfigurator, new CustomStylePropertiesHolder()));
 	}
 	
 	public void configureStyleByName(String styleName) {

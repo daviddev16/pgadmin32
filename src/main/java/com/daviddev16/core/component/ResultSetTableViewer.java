@@ -1,10 +1,9 @@
 package com.daviddev16.core.component;
 
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Vector;
 
 import javax.swing.JTable;
@@ -17,7 +16,7 @@ public final class ResultSetTableViewer extends TableViewer {
 	private static final long serialVersionUID = 6356664162208875101L;
 
 	public ResultSetTableViewer() { super(); }
-	
+
 	public void setResultSet(final ResultSet resultSet) {
 		try {
 			setHasFirstFixedColumn(true);
@@ -46,18 +45,20 @@ public final class ResultSetTableViewer extends TableViewer {
 			tableModel.setColumnIdentifiers(columnIdentifier);
 			int contador = 0;
 			while (resultSet.next()) {
-				Vector<Object> dataVector = new Vector<Object>(resultSetMetaData.getColumnCount() + 2);
+				Vector<String> dataVector = new Vector<String>(resultSetMetaData.getColumnCount() + 2);
 				dataVector.add(""+contador);
 				contador++;
 				for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
-					Object dataObject = resultSet.getObject(i);
-					if (dataObject == null) {
-						dataObject = "";
-					}
-					if (dataObject instanceof Clob || dataObject instanceof Blob) {
+					Object dataObject = null;
+					if (resultSetMetaData.getColumnType(i) != Types.BINARY) {
+						dataObject= resultSet.getObject(i);
+						if (dataObject == null) {
+							dataObject = "-";
+						}
+					} else {
 						dataObject = "<binary data>";
 					}
-					dataVector.add(dataObject);
+					dataVector.add(dataObject.toString());
 					int fontStrWidth = Math.min(getFontMetrics(getFont()).stringWidth(dataObject.toString()) + 30, 80);
 					if (widths[i - 1] < fontStrWidth) {
 						widths[i - 1] = fontStrWidth;
@@ -77,15 +78,14 @@ public final class ResultSetTableViewer extends TableViewer {
 					column.setPreferredWidth(widths[i - 1]);
 				}
 			}    
-//			getTableHeader().setPreferredSize(new Dimension(getTableHeader().getWidth(),45));
+			//			getTableHeader().setPreferredSize(new Dimension(getTableHeader().getWidth(),45));
 			//setAutoCreateRowSorter(true);
 			//TableRowSorter<?> rowSorter = (TableRowSorter<?>) getRowSorter();
 			//rowSorter.setSortsOnUpdates(true);
 			revalidate();
-			System.gc();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

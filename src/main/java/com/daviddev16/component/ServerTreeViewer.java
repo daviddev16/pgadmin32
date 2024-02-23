@@ -164,6 +164,16 @@ public class ServerTreeViewer extends TreeViewer {
 		eventManager.dispatchEvent(treeNodeInteractEvent);
 	}
 
+	public Database getInheritedServerDatabase(DatabaseDataObject databaseDataObject) {
+		if (databaseDataObject instanceof Database)
+			return (Database) databaseDataObject;
+		DatabaseDataObject parentDatabaseDataObject = databaseDataObject.getParent();
+		if (parentDatabaseDataObject != null)
+			return getInheritedServerDatabase(parentDatabaseDataObject);
+		else
+			return null;
+	}
+	
 	public DatabaseDataObject getLastSelectedDatabaseDataObject() {
 		return lastSelectedDatabaseDataObject.get();
 	}

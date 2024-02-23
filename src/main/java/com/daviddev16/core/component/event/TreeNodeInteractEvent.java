@@ -9,11 +9,9 @@ public abstract class TreeNodeInteractEvent extends AbstractCancellableEvent {
 
 	private TreeNodeInteractionType treeNodeInteractionType = TreeNodeInteractionType.UNKNOWN_EVENT;
 	private final DefaultMutableTreeNode interactedTreeNode;
-	private final TreeViewer treeViewer;
 
-	public TreeNodeInteractEvent(TreeViewer treeViewer, 
-								 DefaultMutableTreeNode interactedTreeNode) {
-		this.treeViewer = treeViewer;
+	public TreeNodeInteractEvent(TreeViewer sender, DefaultMutableTreeNode interactedTreeNode) {
+		super(sender);
 		this.interactedTreeNode = interactedTreeNode;
 	}
 
@@ -30,12 +28,8 @@ public abstract class TreeNodeInteractEvent extends AbstractCancellableEvent {
 	}
 	
 	public TreeViewer getTreeViewer() {
-		return treeViewer;
+		return (TreeViewer) getSender();
 	}
 	
-	@Override
-	public Object getSender() {
-		return treeViewer;
-	}
 	
 }

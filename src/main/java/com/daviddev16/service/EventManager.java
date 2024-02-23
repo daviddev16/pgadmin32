@@ -30,7 +30,7 @@ public final class EventManager implements Comparator<EventContextHolder> {
 				evtCntxHolder2.getEventPriority().getPriorityLevel());
 	}
 
-	private List<EventContextHolder> getAllCompatibleMethodsWithDesignatedEvent(Event event) {
+	private List<EventContextHolder> createEventContextHolderFromEvent(Event event) {
 		Class<?> eventClassType = event.getClass();
 		List<EventContextHolder> compatibleMethodsList = new LinkedList<EventContextHolder>();
 		for (EventListener eventListener : getEventListeners()) {
@@ -56,10 +56,10 @@ public final class EventManager implements Comparator<EventContextHolder> {
 		return compatibleMethodsList;
 	}
 
-	public synchronized void dispatchEvent(Event event) {
+	public void dispatchEvent(Event event) {
 		Objects.requireNonNull(event, "The \"event\" object must not be null.");
 		boolean eventChainCancelledState = false;
-		for (EventContextHolder eventContextHolder : getAllCompatibleMethodsWithDesignatedEvent(event)) {			
+		for (EventContextHolder eventContextHolder : createEventContextHolderFromEvent(event)) {			
 			if (eventChainCancelledState) 
 				break;
 			if (event instanceof CancellableEvent) {

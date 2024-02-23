@@ -28,7 +28,7 @@ public final class DarkStyleConfigurator implements StyleConfigurator {
 	
 	@Override
 	public String getStyleName() {
-		return DarkStyleConfigurator.class.getSimpleName();
+		return DarkStyleConfigurator.class.getName();
 	}
 
 	@Override

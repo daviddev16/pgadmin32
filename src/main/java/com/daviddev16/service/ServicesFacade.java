@@ -25,6 +25,7 @@ import com.daviddev16.style.StyleManager;
 import com.daviddev16.util.IOUtils;
 
 import static com.daviddev16.util.IOUtils.createSvgImageFromFile;
+import static com.daviddev16.util.IOUtils.createImageFromFile;
 import static com.daviddev16.util.Resources.path;
 
 public class ServicesFacade {
@@ -72,6 +73,7 @@ public class ServicesFacade {
 		fileResourceLocator.register("Server16px",   createSvgImageFromFile( path("ui/Server16px.svg")));
 		fileResourceLocator.register("Database16px", createSvgImageFromFile( path("ui/Database16px.svg")));
 		fileResourceLocator.register("Table16px", 	 createSvgImageFromFile( path("ui/Table16px.svg")));
+		fileResourceLocator.register("Execute16px",  createSvgImageFromFile( path("ui/Execute16px.svg")));
 		
 		fileResourceLocator.register("Column16px",  createSvgImageFromFile( path("ui/Column16px.svg")));
 		fileResourceLocator.register("Catalog10px", createSvgImageFromFile( path("ui/Catalog16px.svg")).derive(10, 10));
@@ -79,6 +81,9 @@ public class ServicesFacade {
 
 		fileResourceLocator.register("Postgres16px",  createSvgImageFromFile( path("ui/Postgres16px.svg")));
 		fileResourceLocator.register("Statistic16px", createSvgImageFromFile( path("ui/Statistic16px.svg")));
+		fileResourceLocator.register("Up16px",        createSvgImageFromFile( path("ui/Up16px.svg")));
+		
+		fileResourceLocator.register("pgAdminIcon",        createImageFromFile( path("ui/pgadmin-2.png")));
 		
 		fileResourceLocator.register("Collapse16px", createSvgImageFromFile( path("ui/Collapse16px.svg")));
 		

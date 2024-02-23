@@ -22,8 +22,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-
 import com.daviddev16.FrmApplicationMain;
 import com.daviddev16.component.ServerTreeViewer;
 import com.daviddev16.core.Connector;
@@ -158,7 +156,7 @@ public class TableEventListener implements EventListener {
 			}
 		}
 
-		RSyntaxTextArea textArea = FrmApplicationMain.getMainUI().sntxtxtrNoSql;
+		//RSyntaxTextArea textArea = FrmApplicationMain.getMainUI().sntxtxtrNoSql;
 		StringBuilder sqlBuilder = new StringBuilder();
 		sqlBuilder.append(String.format("CREATE TABLE %s.%s\n(\n", table.getPostgresObjectMetadata()
 				.getRelationNamespace(), table.getTableName()));
@@ -182,7 +180,7 @@ public class TableEventListener implements EventListener {
 			columnsJoiner.add("    " + constraintDef);
 		});
 		sqlBuilder.append(columnsJoiner.toString() + "\n);");
-		textArea.setText(sqlBuilder.toString().trim());
+		System.out.println(sqlBuilder.toString().trim());
 	}
 
 	/*TODO:*/
