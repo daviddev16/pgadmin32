@@ -6,17 +6,13 @@ import org.fife.ui.rsyntaxtextarea.Theme;
 
 public interface StyleConfigurator {
 
-	default void initialize() {
-		System.out.println(String.format("%s iniciou o carregamneto do estilo.", getStyleName()));
-	}
+	default String getStyleName() { return getClass().getSimpleName(); }
 
-	default void done() {
-		System.out.println(String.format("%s carregou o estilo com sucesso.", getStyleName()));
-	}
-	
 	String getStyleDisplayName();
+	
+	default void initialize() {}
 
-	String getStyleName();
+	default void done() {}
 
 	Theme getEditorTheme();
 	

@@ -3,15 +3,14 @@ package com.daviddev16;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.util.Arrays;
+import java.util.List;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,6 +28,7 @@ import javax.swing.border.LineBorder;
 
 import com.daviddev16.component.BorderlessButton;
 import com.daviddev16.component.ServerTreeViewer;
+import com.daviddev16.component.StyleConfiguratorComboBox;
 import com.daviddev16.component.dialog.FrmServerConnection;
 import com.daviddev16.core.CustomStyleComponentConfiguration;
 import com.daviddev16.core.EventListener;
@@ -43,7 +43,6 @@ import com.daviddev16.service.EventManager;
 import com.daviddev16.service.ServicesFacade;
 import com.daviddev16.service.configuration.ServerConfiguration;
 import com.daviddev16.style.CustomStylePropertiesHolder;
-import com.daviddev16.style.LightStyleConfigurator;
 import com.daviddev16.style.StyleManager;
 
 public class FrmApplicationMain extends JFrame implements EventListener, 
@@ -56,9 +55,13 @@ public class FrmApplicationMain extends JFrame implements EventListener,
 	private static FrmApplicationMain mainUI;
 	private final ServerConfiguration serverConfiguration; 
 	private final ResourceLocator resourceLocator;
+	private final StyleManager styleManager;
 	private final EventManager eventManager;
 
 	{
+		styleManager = ServicesFacade.getServices()
+				.getStyleManager();
+		
 		serverConfiguration = ServicesFacade.getServices()
 				.getServerConfigurationHandler().getHandledConfiguration();
 
@@ -80,19 +83,21 @@ public class FrmApplicationMain extends JFrame implements EventListener,
 	private QuickInteractFrameFragment quickInteractFrameFragment;
 	private BorderlessButton btnCollapseTree;
 	private BorderlessButton btnAddServer;
-	private JComboBox<String> cmbBxStyleSelector;
-
+	private StyleConfiguratorComboBox cmbBxStyleSelector;
+  	
 	public FrmApplicationMain() {
-
+		mainUI = this;
+		
 		eventManager = ServicesFacade.getServices().getEventManager();
 		eventManager.registerListener(this);
 
-		setIconImage(resourceLocator.image("pgAdminIcon"));
 		
-		mainUI = this;
-		setTitle("PostgreSQL Admin 3.2");
+		setTitle("pgAdmin32");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setIconImages(createImageListOfPostgresAdminIcons());
 		setBounds(100, 100, 920, 756);
+		setLocationRelativeTo(null);
+		
 		contentPane = new JPanel();
 		setContentPane(contentPane);
 
@@ -108,22 +113,8 @@ public class FrmApplicationMain extends JFrame implements EventListener,
 		footerPanel = new JPanel();
 	
 		/*TODO:*/
-		cmbBxStyleSelector = new JComboBox<String>();
-		StyleManager styleManager = ServicesFacade.getServices().getStyleManager();
-		DefaultComboBoxModel<String> boxModel = new DefaultComboBoxModel<String>();
-		for (String styleName : styleManager.getStyleConfigurators().keySet()) {
-			boxModel.addElement(styleName);
-		}
-		cmbBxStyleSelector.setModel(boxModel);
-		cmbBxStyleSelector.setSelectedItem(LightStyleConfigurator.class.getName());
-		cmbBxStyleSelector.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				Object selectedStyleName = cmbBxStyleSelector.getSelectedItem();
-				if (selectedStyleName != null) {
-					styleManager.configureStyleByName(selectedStyleName.toString());
-				}
-			}
-		});
+		cmbBxStyleSelector = new StyleConfiguratorComboBox();
+    	cmbBxStyleSelector.loadAllStyles(styleManager.getAsListOfStyleConfigurators());
 		cmbBxStyleSelector.setMaximumSize(new Dimension(200, 40));
 		headerToolBar.add(cmbBxStyleSelector);
 		/*TODO:*/
@@ -148,6 +139,8 @@ public class FrmApplicationMain extends JFrame implements EventListener,
 		treeScrollPane = new JScrollPane();
 		treeScrollPane.setFocusable(false);
 		treeScrollPane.setViewportView(serverTreeViewer);
+		
+
 		treeScrollPane.setColumnHeaderView(serverTreeToolBar);
 		treeSplitPane.setLeftComponent(treeScrollPane);
 		
@@ -232,7 +225,6 @@ public class FrmApplicationMain extends JFrame implements EventListener,
 		treeSplitPane.setBorder(null);
 		dataSetTable .setBorder(null);
 	}
-
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onChangedStyleStateEvent(ChangedStyleStateEvent styleStateEvent) 
@@ -248,6 +240,12 @@ public class FrmApplicationMain extends JFrame implements EventListener,
 		System.out.println("kakaokoka");
 	}
 
+	private List<Image> createImageListOfPostgresAdminIcons() {
+		return Arrays.asList(
+				resourceLocator.image("pgadmin1"), resourceLocator.image("pgadmin2"), 
+				resourceLocator.image("pgadmin3"), resourceLocator.image("pgadmin4")
+				);
+	}
 
 	private void setupAllServers() {
 		serverConfiguration.getServers().forEach(server -> { 
@@ -281,7 +279,7 @@ public class FrmApplicationMain extends JFrame implements EventListener,
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand() == BTN_ACT_ADD_SERVER_COMMAND) 
 		{
-			FrmServerConnection dialog = new FrmServerConnection();
+			FrmServerConnection dialog = new FrmServerConnection(false);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} 
@@ -296,4 +294,5 @@ public class FrmApplicationMain extends JFrame implements EventListener,
 		
 	}
 
+	
 }

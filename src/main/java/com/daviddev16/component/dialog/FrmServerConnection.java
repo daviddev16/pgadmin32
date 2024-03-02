@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -20,8 +21,16 @@ public class FrmServerConnection extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 	private final JPanel contentPanel = new JPanel();
+	private LabeledTextField txFdNmServidor;
+	private LabeledTextField txFdEnderecoHost;
+	private LabeledTextField txFdPortaHost;
+	private LabeledTextField txFdNmUsuario;
+	private LabeledTextField txFdSenha;
 	
-	public FrmServerConnection() {
+	private Server server;
+	
+	public FrmServerConnection(boolean editMode) {
+		
 		setTitle("Configurador de conexão");
 		setResizable(false);
 		setModal(true);
@@ -32,31 +41,31 @@ public class FrmServerConnection extends JDialog {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(null);
 		
-		LabeledTextField txFdNmServidor = new LabeledTextField();
+		txFdNmServidor = new LabeledTextField();
 		txFdNmServidor.getTextField().setText("Nome do Servidor");
 		txFdNmServidor.setTitle("Nome do Servidor:");
 		txFdNmServidor.setBounds(10, 11, 325, 49);
 		contentPanel.add(txFdNmServidor);
 		
-		LabeledTextField txFdEnderecoHost = new LabeledTextField();
+		txFdEnderecoHost = new LabeledTextField();
 		txFdEnderecoHost.getTextField().setText("127.0.0.1");
 		txFdEnderecoHost.setTitle("Endereço do Host:");
 		txFdEnderecoHost.setBounds(10, 65, 325, 49);
 		contentPanel.add(txFdEnderecoHost);
 		
-		LabeledTextField txFdPortaHost = new LabeledTextField();
+		txFdPortaHost = new LabeledTextField();
 		txFdPortaHost.getTextField().setText("5432");
 		txFdPortaHost.setTitle("Porta do Host:");
 		txFdPortaHost.setBounds(10, 119, 325, 49);
 		contentPanel.add(txFdPortaHost);
 		
-		LabeledTextField txFdNmUsuario = new LabeledTextField();
+		txFdNmUsuario = new LabeledTextField();
 		txFdNmUsuario.getTextField().setText("postgres");
 		txFdNmUsuario.setTitle("Usuário:");
 		txFdNmUsuario.setBounds(10, 173, 325, 49);
 		contentPanel.add(txFdNmUsuario);
 		
-		LabeledTextField txFdSenha = new LabeledTextField();
+		txFdSenha = new LabeledTextField();
 		txFdSenha.getTextField().setText("#abc123#");
 		txFdSenha.setTitle("Senha:");
 		txFdSenha.setBounds(10, 227, 325, 49);
@@ -70,23 +79,38 @@ public class FrmServerConnection extends JDialog {
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) 
 					{
+
 						String encryptedPassword = null;
 						try {
 							encryptedPassword = AES256Manager.encrypt(txFdSenha.getInput());
 						} catch (Exception e1) {
 							throw new IllegalStateException("Failed to encrypt the password.", e1);
 						}
-						Server server = Server
-								.builder()
-									.serverName(txFdNmServidor.getInput())
-									.host(txFdEnderecoHost.getInput())
-									.password(encryptedPassword)
-									.port(Integer.parseInt(txFdPortaHost.getInput()))
-									.username(txFdNmUsuario.getInput())
-								.build();
-						
-						ServicesFacade.getServices().getEventManager()
-							.dispatchEvent(new CreatedServerEvent(FrmServerConnection.this, server));
+						if (!editMode) {
+							Server server = Server
+									.builder()
+										.serverName(txFdNmServidor.getInput())
+										.host(txFdEnderecoHost.getInput())
+										.password(encryptedPassword)
+										.port(Integer.parseInt(txFdPortaHost.getInput()))
+										.username(txFdNmUsuario.getInput())
+									.build();
+							
+							
+							ServicesFacade.getServices().getEventManager()
+								.dispatchEvent(new CreatedServerEvent(FrmServerConnection.this, server));							
+						} else if (server != null) {
+							server.setServerName(txFdNmServidor.getInput());
+							server.setHost(txFdEnderecoHost.getInput());
+							server.setPassword(encryptedPassword);
+							server.setPort(Integer.parseInt(txFdPortaHost.getInput()));
+							server.setUsername(txFdNmUsuario.getInput());
+							try {
+								ServicesFacade.getServices().getServerConfigurationHandler().save();
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+						}
 						
 						dispose();
 					}
@@ -97,9 +121,22 @@ public class FrmServerConnection extends JDialog {
 			}
 			{
 				JButton cancelButton = new JButton("Cancel");
+				cancelButton.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						dispose();
+					}
+				});
 				cancelButton.setActionCommand("Cancel");
 				buttonPane.add(cancelButton);
 			}
 		}
+	}
+	
+	public void setInitializeServerConfiguration(Server server) {
+		this.server = server;
+		txFdNmUsuario.getTextField().setText(server.getUsername());
+		txFdNmServidor.getTextField().setText(server.getServerName());
+		txFdEnderecoHost.getTextField().setText(server.getHost());
+		txFdPortaHost.getTextField().setText("" + server.getPort());
 	}
 }

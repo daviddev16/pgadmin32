@@ -10,10 +10,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import com.daviddev16.component.ServerTreeViewer;
 import com.daviddev16.core.Connector;
 import com.daviddev16.core.DataCollectorQueries;
+import com.daviddev16.core.EntityMetadata;
 import com.daviddev16.core.EventListener;
 import com.daviddev16.core.JdbcArtifact;
+import com.daviddev16.core.NodeState;
 import com.daviddev16.core.annotation.EventHandler;
-import com.daviddev16.core.postgres.PostgresObjectMetadata;
 import com.daviddev16.event.server.DatabaseNodeInteractEvent;
 import com.daviddev16.event.server.ServerNodeInteractEvent;
 import com.daviddev16.node.Database;
@@ -35,7 +36,6 @@ public class ServerHierachyEventListener implements EventListener {
 	@EventHandler
 	public void onInteractWithServerNodeEvent(ServerNodeInteractEvent serverNodeInteractEvent) throws SQLException 
 	{
-		System.out.println("kodaokdokaok");
 		DefaultMutableTreeNode clickedNodeTree = serverNodeInteractEvent.getInteractedTreeNode();
 		ServerTreeViewer serverTreeViewer = (ServerTreeViewer) serverNodeInteractEvent.getSender();
 		Server server = (Server) clickedNodeTree.getUserObject();
@@ -68,17 +68,18 @@ public class ServerHierachyEventListener implements EventListener {
 				database.setConnector(null); /* database deve ser seu proprio Connector */
 				database.setDatabaseName(databaseName);
 
-				PostgresObjectMetadata postgresObjectMetadata = new PostgresObjectMetadata();
-				postgresObjectMetadata.setOid(databaseOid);
-				postgresObjectMetadata.setRelationName(databaseName);
+				EntityMetadata entityMetadata = new EntityMetadata();
+				entityMetadata.setId(databaseOid);
+				entityMetadata.setRelationName(databaseName);
 
-				database.setPostgresObjectMetadata(postgresObjectMetadata);
+				database.setPostgresObjectMetadata(entityMetadata);
 				database.setParentJdbcArtifact(serverJdbcArtifact);
 
 				clickedNodeTree.insert(new DefaultMutableTreeNode(database), 0);
 			}
 
 			serverTreeViewer.reloadAndRestoreExpandedState(clickedNodeTree);
+			server.setNodeState(NodeState.LOADED);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -123,10 +124,10 @@ public class ServerHierachyEventListener implements EventListener {
 		schemaGroupLabel.setParent(database);
 		schemaGroupLabel.setConnector(database);
 
-		PostgresObjectMetadata postgresObjectMetadata = new PostgresObjectMetadata();
-		postgresObjectMetadata.setParentRelationOid( database.getPostgresObjectMetadata().getOid() );
+		EntityMetadata entityMetadata = new EntityMetadata();
+		entityMetadata.setParentRelationId( database.getPostgresObjectMetadata().getId() );
 
-		schemaGroupLabel.setPostgresObjectMetadata(postgresObjectMetadata);
+		schemaGroupLabel.setPostgresObjectMetadata(entityMetadata);
 
 		clickedNodeTree.insert(new DefaultMutableTreeNode(schemaGroupLabel), 0);
 
@@ -134,16 +135,16 @@ public class ServerHierachyEventListener implements EventListener {
 		catalogGroupLabel.setParent(database);
 		catalogGroupLabel.setConnector(database);
 
-		PostgresObjectMetadata postgresObjectMetadata1 = new PostgresObjectMetadata();
-		postgresObjectMetadata1.setParentRelationOid( database.getPostgresObjectMetadata().getOid() );
+		EntityMetadata postgresObjectMetadata1 = new EntityMetadata();
+		postgresObjectMetadata1.setParentRelationId( database.getPostgresObjectMetadata().getId() );
 
 		catalogGroupLabel.setPostgresObjectMetadata(postgresObjectMetadata1);
 
 		clickedNodeTree.insert(new DefaultMutableTreeNode(catalogGroupLabel), 1);
 
 		serverTreeViewer.reloadAndRestoreExpandedState(clickedNodeTree);
-		database.markAsLoaded();
-
+		
+		database.setNodeState(NodeState.LOADED);
 	}
 
 	private void executePreLoader(Connector connector, String preLoaderSqlScript) 

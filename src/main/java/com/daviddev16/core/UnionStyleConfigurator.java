@@ -1,4 +1,4 @@
-package com.daviddev16.style;
+package com.daviddev16.core;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,19 +7,18 @@ import javax.swing.LookAndFeel;
 
 import org.fife.ui.rsyntaxtextarea.Theme;
 
-import com.daviddev16.core.StyleConfigurator;
-import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.daviddev16.style.laf.FlatMacUnionLaf;
 
-public final class DarkStyleConfigurator implements StyleConfigurator {
+public final class UnionStyleConfigurator implements StyleConfigurator {
 
 	private Theme editorTheme;
 	private LookAndFeel lookAndFeel;
 	
-	public DarkStyleConfigurator() {
+	public UnionStyleConfigurator() {
 		try {
-			lookAndFeel = new FlatMacDarkLaf();
-			InputStream inputStream = DarkStyleConfigurator.class
-					.getResourceAsStream("/com/daviddev16/themes/syntax/monokai.xml");
+			lookAndFeel = new FlatMacUnionLaf();
+			InputStream inputStream = UnionStyleConfigurator.class
+					.getResourceAsStream("/com/daviddev16/themes/syntax/monokai2.xml");
 			editorTheme = Theme.load(inputStream);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -38,7 +37,7 @@ public final class DarkStyleConfigurator implements StyleConfigurator {
 
 	@Override
 	public String getStyleDisplayName() {
-		return "Dark";
+		return "Union";
 	}
 	
 }

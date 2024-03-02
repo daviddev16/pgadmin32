@@ -6,7 +6,8 @@ public class BorderlessButton extends JButton {
 	
 	private static final long serialVersionUID = 102057044461075908L;
 	
-	public BorderlessButton() {
+	public BorderlessButton() 
+	{
 		super();
 		SwingUtil.initializeDefaultsBordelessButton(this, SwingUtil.DIMENSION_SQUARE_20);
 	}

@@ -7,8 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JOptionPane;
-
+import com.daviddev16.component.dialog.DlgErrorDetails;
 import com.daviddev16.core.Connector;
 import com.daviddev16.core.JdbcArtifact;
 
@@ -33,8 +32,19 @@ public class ConnectionManager implements Runnable {
 				return connection;
 			}
 		} catch (ClassNotFoundException | SQLException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
+			DlgErrorDetails.showForExcetion(e);
 			throw new RuntimeException("A error ocurred while connecting to the PostgreSQL cluster.", e);
+		}
+	}
+	
+	public synchronized void disposeConnection(String nodeIdentifier) {
+		Connection connection = connections.get(nodeIdentifier);
+		try {
+			if (connection != null && !connection.isClosed()) {
+				connection.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

@@ -10,9 +10,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import com.daviddev16.component.ServerTreeViewer;
 import com.daviddev16.core.Connector;
 import com.daviddev16.core.DataCollectorQueries;
+import com.daviddev16.core.EntityMetadata;
 import com.daviddev16.core.EventListener;
+import com.daviddev16.core.NodeState;
 import com.daviddev16.core.annotation.EventHandler;
-import com.daviddev16.core.postgres.PostgresObjectMetadata;
 import com.daviddev16.event.server.SchemaNodeInteractEvent;
 import com.daviddev16.node.Schema;
 import com.daviddev16.node.Table;
@@ -56,19 +57,19 @@ public class SchemaEventListener implements EventListener {
 				table.setConnector(schemaConnector);
 				table.setParent(schema);
 
-				PostgresObjectMetadata postgresObjectMetadata = new PostgresObjectMetadata();
-				postgresObjectMetadata.setParentRelationOid( schema.getPostgresObjectMetadata().getOid() );
-				postgresObjectMetadata.setRelationNamespace( schema.getSchemaName() );
-				postgresObjectMetadata.setRelationName(tableName);
-				postgresObjectMetadata.setOid(tableOid);
+				EntityMetadata entityMetadata = new EntityMetadata();
+				entityMetadata.setParentRelationId( schema.getPostgresObjectMetadata().getId() );
+				entityMetadata.setRelationNamespace( schema.getSchemaName() );
+				entityMetadata.setRelationName(tableName);
+				entityMetadata.setId(tableOid);
 
-				table.setPostgresObjectMetadata(postgresObjectMetadata);
+				table.setPostgresObjectMetadata(entityMetadata);
 				clickedNodeTree.insert(new DefaultMutableTreeNode(table), 0);
 			}
 
 			createSequencesLabelInTableNode(schema, clickedNodeTree);
 			serverTreeViewer.reloadAndRestoreExpandedState(clickedNodeTree);
-			schema.markAsLoaded();
+			schema.setNodeState(NodeState.LOADED);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -89,12 +90,12 @@ public class SchemaEventListener implements EventListener {
 		sequencesGroup.setConnector(schema.getConnector());
 		sequencesGroup.setParent(schema);
 
-		PostgresObjectMetadata postgresObjectMetadata = new PostgresObjectMetadata();
-		postgresObjectMetadata.setParentRelationOid( schema.getPostgresObjectMetadata().getOid() );
-		postgresObjectMetadata.setRelationNamespace( schema.getPostgresObjectMetadata().getRelationNamespace() );
-		postgresObjectMetadata.setRelationName( PostgresObjectMetadata.NON_PG_CLASSABLE_OBJECT );
+		EntityMetadata entityMetadata = new EntityMetadata();
+		entityMetadata.setParentRelationId( schema.getPostgresObjectMetadata().getId() );
+		entityMetadata.setRelationNamespace( schema.getPostgresObjectMetadata().getRelationNamespace() );
+		entityMetadata.setRelationName( EntityMetadata.DUMMY );
 
-		sequencesGroup.setPostgresObjectMetadata(postgresObjectMetadata);
+		sequencesGroup.setPostgresObjectMetadata(entityMetadata);
 
 		tableNodeTree.insert(new DefaultMutableTreeNode(sequencesGroup), 0);
 	}

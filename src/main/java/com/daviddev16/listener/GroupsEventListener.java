@@ -11,9 +11,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import com.daviddev16.component.ServerTreeViewer;
 import com.daviddev16.core.Connector;
 import com.daviddev16.core.DataCollectorQueries;
+import com.daviddev16.core.EntityMetadata;
 import com.daviddev16.core.EventListener;
+import com.daviddev16.core.NodeState;
 import com.daviddev16.core.annotation.EventHandler;
-import com.daviddev16.core.postgres.PostgresObjectMetadata;
 import com.daviddev16.event.server.ConstraintsGroupNodeInteractEvent;
 import com.daviddev16.event.server.IndexGroupNodeInteractEvent;
 import com.daviddev16.event.server.SchemaGroupNodeInteractEvent;
@@ -78,17 +79,18 @@ public class GroupsEventListener implements EventListener {
 				schema.setSchemaName(schemaName);
 				schema.setParent(schemaGroupLabel);
 				
-				PostgresObjectMetadata postgresObjectMetadata = new PostgresObjectMetadata();
-				postgresObjectMetadata.setParentRelationOid( schemaGroupLabel.getPostgresObjectMetadata().getOid() );
-				postgresObjectMetadata.setRelationName(schemaName);
-				postgresObjectMetadata.setOid(schemaOid);
+				EntityMetadata entityMetadata = new EntityMetadata();
+				entityMetadata.setParentRelationId( schemaGroupLabel.getPostgresObjectMetadata().getId() );
+				entityMetadata.setRelationName(schemaName);
+				entityMetadata.setId(schemaOid);
 
-				schema.setPostgresObjectMetadata(postgresObjectMetadata);
+				schema.setPostgresObjectMetadata(entityMetadata);
 				clickedNodeTree.insert(new DefaultMutableTreeNode(schema), 0);
+				
 			}
 			serverTreeViewer.reloadAndRestoreExpandedState(clickedNodeTree);
-			schemaGroupLabel.markAsLoaded();
-
+			schemaGroupLabel.setNodeState(NodeState.LOADED);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		
@@ -125,7 +127,7 @@ public class GroupsEventListener implements EventListener {
 		ResultSet resultSet = null;
 		try {
 			String allSequencesOfNamespaceQuery = dataCollectorQueries.getAllSequencesOfNamespaceQuery();
-			Integer sequenceNamespaceOid = sequenceGroupLabel.getPostgresObjectMetadata().getParentRelationOid();
+			Integer sequenceNamespaceOid = sequenceGroupLabel.getPostgresObjectMetadata().getParentRelationId();
 			preparedStatement = connection.prepareStatement(allSequencesOfNamespaceQuery);
 			preparedStatement.setInt(1, sequenceNamespaceOid);
 
@@ -143,16 +145,16 @@ public class GroupsEventListener implements EventListener {
 				sequence.setSequencelastValue(sequenceLastValue);
 				sequence.setParent(sequenceGroupLabel);
 				
-				PostgresObjectMetadata postgresObjectMetadata = new PostgresObjectMetadata();
-				postgresObjectMetadata.setParentRelationOid(sequenceNamespaceOid);
-				postgresObjectMetadata.setRelationName(sequenceName);
-				postgresObjectMetadata.setOid(sequenceOid);
+				EntityMetadata entityMetadata = new EntityMetadata();
+				entityMetadata.setParentRelationId(sequenceNamespaceOid);
+				entityMetadata.setRelationName(sequenceName);
+				entityMetadata.setId(sequenceOid);
 
-				sequence.setPostgresObjectMetadata(postgresObjectMetadata);
+				sequence.setPostgresObjectMetadata(entityMetadata);
 				clickedNodeTree.insert(new DefaultMutableTreeNode(sequence), 0);
 			}
 			serverTreeViewer.reloadAndRestoreExpandedState(clickedNodeTree);
-			sequenceGroupLabel.markAsLoaded();
+			sequenceGroupLabel.setNodeState(NodeState.LOADED);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -188,7 +190,7 @@ public class GroupsEventListener implements EventListener {
 		ResultSet resultSet = null;
 		try {
 			String allIndexesOfTableQuery = dataCollectorQueries.getAllIndexesOfTableQuery();
-			Integer parentTableOid = indexesGroup.getPostgresObjectMetadata().getParentRelationOid();
+			Integer parentTableOid = indexesGroup.getPostgresObjectMetadata().getParentRelationId();
 			preparedStatement = connection.prepareStatement(allIndexesOfTableQuery);
 			preparedStatement.setInt(1, parentTableOid);
 
@@ -204,18 +206,18 @@ public class GroupsEventListener implements EventListener {
 				index.setIndexName(indexName);
 				index.setParent(indexesGroup);
 				
-				PostgresObjectMetadata postgresObjectMetadata = new PostgresObjectMetadata();
-				postgresObjectMetadata.setRelationNamespace(indexesGroup.getPostgresObjectMetadata().getRelationNamespace());
-				postgresObjectMetadata.setParentRelationOid(parentTableOid);
-				postgresObjectMetadata.setRelationName(indexName);
-				postgresObjectMetadata.setOid(indexOid);
+				EntityMetadata entityMetadata = new EntityMetadata();
+				entityMetadata.setRelationNamespace(indexesGroup.getPostgresObjectMetadata().getRelationNamespace());
+				entityMetadata.setParentRelationId(parentTableOid);
+				entityMetadata.setRelationName(indexName);
+				entityMetadata.setId(indexOid);
 
-				index.setPostgresObjectMetadata(postgresObjectMetadata);
+				index.setPostgresObjectMetadata(entityMetadata);
 				clickedNodeTree.insert(new DefaultMutableTreeNode(index), 0);
 				
 			}
 			serverTreeViewer.reloadAndRestoreExpandedState(clickedNodeTree);
-			indexesGroup.markAsLoaded();
+			indexesGroup.setNodeState(NodeState.LOADED);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -251,7 +253,7 @@ public class GroupsEventListener implements EventListener {
 		ResultSet resultSet = null;
 		try {
 			String allConstraintsOfTableQuery = dataCollectorQueries.getAllConstraintsOfTableQuery();
-			Integer parentTableOid = constraintsGroup.getPostgresObjectMetadata().getParentRelationOid();
+			Integer parentTableOid = constraintsGroup.getPostgresObjectMetadata().getParentRelationId();
 			preparedStatement = connection.prepareStatement(allConstraintsOfTableQuery);
 			preparedStatement.setInt(1, parentTableOid);
 
@@ -267,20 +269,20 @@ public class GroupsEventListener implements EventListener {
 				constraint.setConstraintName(constraintName);
 				constraint.setParent(constraintsGroup);
 				
-				PostgresObjectMetadata postgresObjectMetadata = new PostgresObjectMetadata();
-				postgresObjectMetadata.setRelationNamespace(constraintsGroup
+				EntityMetadata entityMetadata = new EntityMetadata();
+				entityMetadata.setRelationNamespace(constraintsGroup
 						.getPostgresObjectMetadata().getRelationNamespace());
 				
-				postgresObjectMetadata.setParentRelationOid(parentTableOid);
-				postgresObjectMetadata.setRelationName(constraintName);
-				postgresObjectMetadata.setOid(conIndOid);
+				entityMetadata.setParentRelationId(parentTableOid);
+				entityMetadata.setRelationName(constraintName);
+				entityMetadata.setId(conIndOid);
 
-				constraint.setPostgresObjectMetadata(postgresObjectMetadata);
+				constraint.setPostgresObjectMetadata(entityMetadata);
 				clickedNodeTree.insert(new DefaultMutableTreeNode(constraint), 0);
 				
 			}
 			serverTreeViewer.reloadAndRestoreExpandedState(clickedNodeTree);
-			constraintsGroup.markAsLoaded();
+			constraintsGroup.setNodeState(NodeState.LOADED);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

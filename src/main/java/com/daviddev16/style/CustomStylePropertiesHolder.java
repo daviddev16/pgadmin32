@@ -9,10 +9,13 @@ public class CustomStylePropertiesHolder {
 	private final Color customInnerBackgroundColor;
 	private final Color customOuterComponentLineColor;
 	
-	public CustomStylePropertiesHolder() 
-	{
-		customInnerBackgroundColor    = new Color(UIManager.getColor("Style.innerComponentBackgroundColor").getRGB());
-		customOuterComponentLineColor = new Color(UIManager.getColor("Style.outerComponentLineColor").getRGB());
+	public CustomStylePropertiesHolder() {
+		customInnerBackgroundColor    = copyColor("Style.innerComponentBackgroundColor");
+		customOuterComponentLineColor = copyColor("Style.outerComponentLineColor");
+	}
+	
+	private Color copyColor(final String uiColorKey) {
+		return new Color(UIManager.getColor(uiColorKey).getRGB());
 	}
 	
 	public Color getInnerBackgroundColor() {

@@ -1,25 +1,44 @@
 package com.daviddev16.core;
 
-import com.daviddev16.core.postgres.PostgresObjectMetadata;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
-@Getter
-@Setter
-@ToString
-@JsonIgnoreProperties
 public abstract class DatabaseDataObject implements ResourcedEntityDataNode {
-
-	private Connector connector;
-	private PostgresObjectMetadata postgresObjectMetadata;
-	private DatabaseDataObject parent;
-	private boolean loaded = false;
 	
-	public void markAsLoaded() {
-		setLoaded(true);
+	@JsonIgnore private Connector connector;
+	@JsonIgnore private DatabaseDataObject parent;
+	@JsonIgnore private EntityMetadata entityMetadata;
+	@JsonIgnore private NodeState nodeState;
+
+	public Connector getConnector() {
+		return connector;
 	}
 	
+	public void setConnector(Connector connector) {
+		this.connector = connector;
+	}
+	
+	public DatabaseDataObject getParent() {
+		return parent;
+	}
+	
+	public void setParent(DatabaseDataObject parent) {
+		this.parent = parent;
+	}
+	
+	public EntityMetadata getPostgresObjectMetadata() {
+		return entityMetadata;
+	}
+	
+	public void setPostgresObjectMetadata(EntityMetadata entityMetadata) {
+		this.entityMetadata = entityMetadata;
+	}
+
+	public NodeState getNodeState() {
+		return nodeState;
+	}
+
+	public void setNodeState(NodeState nodeState) {
+		this.nodeState = nodeState;
+	}
+
 }

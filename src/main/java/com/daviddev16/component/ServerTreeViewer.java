@@ -1,23 +1,29 @@
 package com.daviddev16.component;
 
 import java.awt.Cursor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.swing.JOptionPane;
+import javax.swing.JDialog;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import com.daviddev16.component.dialog.FrmServerConnection;
 import com.daviddev16.core.DatabaseDataObject;
+import com.daviddev16.core.EntityDataNode;
+import com.daviddev16.core.NodeState;
 import com.daviddev16.core.ResourcedEntityDataNode;
 import com.daviddev16.core.component.TreeViewer;
 import com.daviddev16.core.component.event.TreeNodeInteractEvent;
 import com.daviddev16.core.component.event.TreeNodeInteractionType;
-import com.daviddev16.core.postgres.PostgresObjectMetadata;
 import com.daviddev16.event.server.ConstraintsGroupNodeInteractEvent;
 import com.daviddev16.event.server.DatabaseNodeInteractEvent;
 import com.daviddev16.event.server.IndexGroupNodeInteractEvent;
@@ -51,6 +57,9 @@ public class ServerTreeViewer extends TreeViewer {
 	private ResourcedEntityDataNode lastSelectedNode;
 	public TreeExpansionUtil expansionUtil;
 	
+	private JPopupMenu popupMenu;
+	private JMenuItem mntmNewMenuItem;
+	
 	@Override
 	public void initilize() {
 		expansionUtil = new TreeExpansionUtil(this);
@@ -71,7 +80,45 @@ public class ServerTreeViewer extends TreeViewer {
 			}
 		};
 		addMouseListener(ml);
+		
+		popupMenu = new JPopupMenu();
+				
+		
+		mntmNewMenuItem = new JMenuItem("Propriedades");
+		mntmNewMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				
+				DefaultMutableTreeNode clickedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
+				if (clickedNode == null)
+					return;
 
+				ResourcedEntityDataNode entityDataNode = (ResourcedEntityDataNode) clickedNode.getUserObject();
+				
+				System.out.println(entityDataNode);
+				if (entityDataNode instanceof Server) {
+					Server editedServer = (Server) entityDataNode;
+					FrmServerConnection dialog = new FrmServerConnection(true);
+					dialog.setInitializeServerConfiguration(editedServer);
+					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					dialog.setVisible(true);
+					
+					System.out.println(editedServer.getNodeState());
+					
+					if (editedServer.getNodeState() == NodeState.CHANGED) {
+						clickedNode.removeAllChildren();
+						reloadAndRestoreExpandedState(clickedNode);
+						System.out.println("a"+editedServer.getHost());
+					}
+
+					revalidate();
+					
+				}
+			}
+		});
+		popupMenu.add(mntmNewMenuItem);
+		SwingUtilities.updateComponentTreeUI(popupMenu);
+		
 		addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -85,12 +132,12 @@ public class ServerTreeViewer extends TreeViewer {
 					ResourcedEntityDataNode entityDataNode = (ResourcedEntityDataNode) clickedNode.getUserObject();
 
 					if (entityDataNode instanceof DatabaseDataObject) {
-						String text = PostgresObjectMetadata.printMetadata(entityDataNode.getNodeIdentifier(), 
-								((DatabaseDataObject)entityDataNode).getPostgresObjectMetadata());
-						JOptionPane.showMessageDialog(null, text);
+						lastSelectedNode = entityDataNode;
 						requestFocus();
 					}
-
+					
+					addPopup(e, popupMenu);
+					
 					return;
 				}
 
@@ -108,13 +155,9 @@ public class ServerTreeViewer extends TreeViewer {
 				}
 				ResourcedEntityDataNode entityDataNode = (ResourcedEntityDataNode) clickedNode.getUserObject();
 				try {
-					if (entityDataNode instanceof DatabaseDataObject) {
-						if (((DatabaseDataObject)entityDataNode).isLoaded()) {
-							//return;
-						}	
-					}
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					handleDoubleClickTreeNodeEvent(entityDataNode, clickedNode);
+					lastSelectedNode = entityDataNode;
 					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 				} catch (SQLException e1) {
@@ -128,27 +171,35 @@ public class ServerTreeViewer extends TreeViewer {
 												DefaultMutableTreeNode clickedTreeNode) throws SQLException 
 	{
 		TreeNodeInteractEvent treeNodeInteractEvent = null;
+		
 		if (entityDataNode instanceof Server)
 			treeNodeInteractEvent = 
 				new ServerNodeInteractEvent(this, clickedTreeNode);		
+		
 		else if (entityDataNode instanceof Database)	
 			treeNodeInteractEvent =
 				new DatabaseNodeInteractEvent(this, clickedTreeNode);
+		
 		else if (entityDataNode instanceof Schema) 
 			treeNodeInteractEvent = 
 				new SchemaNodeInteractEvent(this, clickedTreeNode);
+		
 		else if (entityDataNode instanceof Table)
 			treeNodeInteractEvent 
 			= new TableNodeInteractEvent(this, clickedTreeNode);
+		
 		else if (entityDataNode instanceof SchemaGroup) 
 			treeNodeInteractEvent = 
 				new SchemaGroupNodeInteractEvent(ServerTreeViewer.this, clickedTreeNode);
+		
 		else if (entityDataNode instanceof SequencesGroup) 
 			treeNodeInteractEvent = 
 				new SequenceGroupNodeInteractEvent(ServerTreeViewer.this, clickedTreeNode);
+		
 		else if (entityDataNode instanceof IndexesGroup) 
 			treeNodeInteractEvent = 
 				new IndexGroupNodeInteractEvent(ServerTreeViewer.this, clickedTreeNode);
+		
 		else if (entityDataNode instanceof ConstraintsGroup) 
 			treeNodeInteractEvent = 
 				new ConstraintsGroupNodeInteractEvent(ServerTreeViewer.this, clickedTreeNode);
@@ -157,9 +208,9 @@ public class ServerTreeViewer extends TreeViewer {
 		if (treeNodeInteractEvent == null)
 			return;
 
-		if (!(entityDataNode instanceof Server)) {
-			lastSelectedDatabaseDataObject.set((DatabaseDataObject) entityDataNode);
-		}
+		if (entityDataNode instanceof DatabaseDataObject)
+			lastSelectedDatabaseDataObject.set(((DatabaseDataObject)entityDataNode));
+		
 		treeNodeInteractEvent.setTreeNodeInteractionType(TreeNodeInteractionType.DOUBLE_CLICK_EVENT);
 		eventManager.dispatchEvent(treeNodeInteractEvent);
 	}
@@ -173,7 +224,12 @@ public class ServerTreeViewer extends TreeViewer {
 		else
 			return null;
 	}
-	
+
+	private static void addPopup(MouseEvent e, final JPopupMenu popup) {
+		popup.show(e.getComponent(), e.getX(), e.getY());
+		SwingUtilities.updateComponentTreeUI(popup);
+	}
+
 	public DatabaseDataObject getLastSelectedDatabaseDataObject() {
 		return lastSelectedDatabaseDataObject.get();
 	}
@@ -191,7 +247,7 @@ public class ServerTreeViewer extends TreeViewer {
 		getDefaultModel().reload();
 	}
 	
-	public ResourcedEntityDataNode getLastSelected() {
+	public EntityDataNode getLastSelected() {
 		return lastSelectedNode;
 	}
 

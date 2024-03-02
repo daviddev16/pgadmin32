@@ -30,6 +30,10 @@ public final class IOUtils {
 		return new FlatSVGIcon(file);
 	}
 	
+	public static FlatSVGIcon createDerivedSvgImageFromFile(File file, int width, int height) throws IOException {
+		return new FlatSVGIcon(file).derive(width, height);
+	}
+	
 	public static boolean containsExtension(String fileName, List<String> extensions) {
 		for (String extension : extensions) {
 			if (fileName.endsWith(extension))

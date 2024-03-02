@@ -7,6 +7,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -18,6 +19,10 @@ import com.daviddev16.core.component.TableViewer;
 
 public class DefaultTableViewerRenderer implements TableCellRenderer {
 
+	public static final Border EMPTY_INSETS_5_BORDER = new EmptyBorder(5, 5, 5, 5);
+	public static final Border CELL_BORDER = new CompoundBorder(new LineBorder(Color.BLACK, 1), new EmptyBorder(4, 4, 4, 4));
+	public static final Color C1 = new Color(240, 240, 240);
+	
 	private final ResourceLocator resourceLocator;
 	
 	public DefaultTableViewerRenderer(ResourceLocator resourceLocator) {
@@ -37,14 +42,14 @@ public class DefaultTableViewerRenderer implements TableCellRenderer {
 			String valueString = (value != null) ? value.toString() : "?";
 			componentLabel.setText(valueString);
 		}
-		componentLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		componentLabel.setBorder(EMPTY_INSETS_5_BORDER);
 		if (hasFocus) {
 			if (column == 0 && ((TableViewer)table).hasFirstFixedColumn())
 			{
 			} 
 			else {
-				componentLabel.setBorder(new CompoundBorder(new LineBorder(Color.BLACK, 1), new EmptyBorder(4, 4, 4, 4)));
-				componentLabel.setBackground(new Color(240, 240, 240));
+				componentLabel.setBorder(CELL_BORDER);
+				componentLabel.setBackground(C1);
 				componentLabel.setOpaque(true);
 			}
 		}

@@ -71,7 +71,6 @@ public final class EventManager implements Comparator<EventContextHolder> {
 
 	private void executeEventContextHolder(EventContextHolder eventContextHolder, Event genericEvent) {
 		try {
-			//System.out.println(eventContextHolder.getEventHandlerMethod().getName() + " = " + eventContextHolder.getEventPriority());
 			EventListener eventListener = eventContextHolder.getEventListener();
 			Method  eventHandlerMethod = eventContextHolder.getEventHandlerMethod();
 			eventHandlerMethod.invoke(eventListener, genericEvent);

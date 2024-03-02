@@ -41,10 +41,7 @@ public abstract class FrameFragment<C extends Container> extends JPanel implemen
 	 */
 	public FrameFragment(C directParentContainer) { 
 		super();
-		
-		//this.directParentContainer = Checks
-		//		.nonNull(directParentContainer, "directParentContainer of [" + getClass().getName() + "]") ;
-		
+
 		this.directParentContainer = directParentContainer;
 		
 		if (eventManager != null)

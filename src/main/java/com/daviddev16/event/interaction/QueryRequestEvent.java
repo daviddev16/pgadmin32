@@ -1,4 +1,4 @@
-package com.daviddev16.event.query;
+package com.daviddev16.event.interaction;
 
 import com.daviddev16.core.event.AbstractCancellableEvent;
 

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.daviddev16.core.ResourcedEntityDataNode;
 import com.daviddev16.core.annotation.Resourced;
+import com.daviddev16.core.data.Statistic;
 
 @Resourced(resourceIdentifier = "Statistic16px")
 public class StatisticResourcedProperty implements ResourcedEntityDataNode {
@@ -40,11 +41,11 @@ public class StatisticResourcedProperty implements ResourcedEntityDataNode {
 	private String statisticDescription;
 
 	public StatisticResourcedProperty(Statistic statistic, boolean showStatisticBracketInformation) {
-		if (statistic.getStatisticName() != null) {
-			String statisticPrettyDescription = statisticDescriptionMap.get(statistic.getStatisticName());
+		if (statistic.getPropertyName() != null) {
+			String statisticPrettyDescription = statisticDescriptionMap.get(statistic.getPropertyName());
 			if (showStatisticBracketInformation)
 				statisticDescription = String.format("<html>[<b>%s</b>] %s</html>", 
-						statistic.getStatisticName(), statisticPrettyDescription);
+						statistic.getPropertyName(), statisticPrettyDescription);
 			else
 				statisticDescription = statisticPrettyDescription;
 		} else {

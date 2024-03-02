@@ -27,11 +27,6 @@ public final class LightStyleConfigurator implements StyleConfigurator {
 	}
 	
 	@Override
-	public String getStyleName() {
-		return LightStyleConfigurator.class.getName();
-	}
-
-	@Override
 	public LookAndFeel getStyleLookAndFeel() {
 		return lookAndFeel;
 	}

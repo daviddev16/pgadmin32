@@ -23,7 +23,7 @@ import com.daviddev16.core.CustomStyleComponentConfiguration;
 import com.daviddev16.core.EventListener;
 import com.daviddev16.core.annotation.EventHandler;
 import com.daviddev16.core.event.EventPriority;
-import com.daviddev16.event.query.QueryRequestEvent;
+import com.daviddev16.event.interaction.QueryRequestEvent;
 import com.daviddev16.event.style.ChangedStyleStateEvent;
 import com.daviddev16.service.EventManager;
 import com.daviddev16.service.ServicesFacade;

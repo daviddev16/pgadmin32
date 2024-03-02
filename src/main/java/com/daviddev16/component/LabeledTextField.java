@@ -12,7 +12,9 @@ public class LabeledTextField extends JPanel {
 	private JLabel lblTitle;
 	private JTextField txtFieldValue;
 
-	public LabeledTextField() {
+	public LabeledTextField() 
+	{
+		super();
 		SpringLayout springLayout = new SpringLayout();
 		setLayout(springLayout);
 		

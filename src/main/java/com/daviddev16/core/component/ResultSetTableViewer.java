@@ -35,7 +35,8 @@ public final class ResultSetTableViewer extends TableViewer {
 			int[] widths = new int[resultSetMetaData.getColumnCount()];
 			for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
 				String columnName = resultSetMetaData.getColumnName(i);
-				columnName = String.format("<html>%s<br>%s</html>", (columnName != null ? columnName.toString() : ""), "defined type");
+				String columnTypeName = resultSetMetaData.getColumnTypeName(i);
+				columnName = String.format("<html>%s<br>%s</html>", (columnName != null ? columnName.toString() : ""), columnTypeName);
 				columnIdentifier.add(columnName);
 				int fontStrWidth = getFontMetrics(getFont()).stringWidth(columnName) + 30;
 				if (widths[i - 1] < fontStrWidth) {
