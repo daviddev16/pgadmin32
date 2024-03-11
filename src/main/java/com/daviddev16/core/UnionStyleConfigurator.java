@@ -1,7 +1,9 @@
 package com.daviddev16.core;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.swing.LookAndFeel;
 
@@ -15,11 +17,15 @@ public final class UnionStyleConfigurator implements StyleConfigurator {
 	private LookAndFeel lookAndFeel;
 	
 	public UnionStyleConfigurator() {
+		FileInputStream fileInputStream = null;
+		try {
+			fileInputStream = new FileInputStream(new File("./resources/theme/syntax/monokai2.xml"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		try {
 			lookAndFeel = new FlatMacUnionLaf();
-			InputStream inputStream = UnionStyleConfigurator.class
-					.getResourceAsStream("/com/daviddev16/themes/syntax/monokai2.xml");
-			editorTheme = Theme.load(inputStream);
+			editorTheme = Theme.load(fileInputStream);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

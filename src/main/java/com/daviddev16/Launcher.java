@@ -21,6 +21,8 @@ public class Launcher {
 						System.setProperty("apple.awt.application.appearance", "system");
 					}
 	
+					System.out.println(System.getProperty("java.version"));
+					
 					JFrame.setDefaultLookAndFeelDecorated(true);
 					JDialog.setDefaultLookAndFeelDecorated(true);
 					

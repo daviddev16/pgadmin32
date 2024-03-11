@@ -12,6 +12,7 @@ import com.daviddev16.event.style.ChangedStyleStateEvent;
 import com.daviddev16.service.EventManager;
 import com.daviddev16.service.ServicesFacade;
 import com.daviddev16.util.Checks;
+import com.daviddev16.util.Resources;
 import com.formdev.flatlaf.FlatLaf;
 
 public final class StyleManager implements ConfigurableStyleManager {
@@ -23,7 +24,7 @@ public final class StyleManager implements ConfigurableStyleManager {
 	public StyleManager() {
 		styleConfiguratorsMap = new HashMap<String, StyleConfigurator>();
 		eventManager = ServicesFacade.getServices().getEventManager();
-		FlatLaf.registerCustomDefaultsSource("com.daviddev16.themes.flatlaf");
+		FlatLaf.registerCustomDefaultsSource(Resources.path("theme/flatlaf"));
 	}
 
 	@Override
@@ -57,7 +58,7 @@ public final class StyleManager implements ConfigurableStyleManager {
 	public void registerStyle(StyleConfigurator styleConfigurator) {
 		registerStyle(styleConfigurator.getStyleName(), styleConfigurator);
 	}
-	
+
 	public Collection<StyleConfigurator> getAsListOfStyleConfigurators() {
 		return styleConfiguratorsMap.values();
 	}
@@ -69,5 +70,5 @@ public final class StyleManager implements ConfigurableStyleManager {
 	public StyleConfigurator getActiveStyleConfigurator() {
 		return activeStyleConfigurator;
 	}
-	
+
 }

@@ -22,6 +22,7 @@ import com.daviddev16.listener.ModifiedStateForUserInterfaceEventListener;
 import com.daviddev16.listener.SchemaEventListener;
 import com.daviddev16.listener.ServerHierachyEventListener;
 import com.daviddev16.listener.TableEventListener;
+import com.daviddev16.node.Table;
 import com.daviddev16.service.configuration.OptionsConfiguration;
 import com.daviddev16.service.configuration.ServerConfiguration;
 import com.daviddev16.service.handler.OptionsConfigurationHandler;
@@ -31,7 +32,8 @@ import com.daviddev16.style.LightStyleConfigurator;
 import com.daviddev16.style.StyleManager;
 import com.daviddev16.util.IOUtils;
 
-public class ServicesFacade {
+@SuppressWarnings("unused")
+public final class ServicesFacade {
 
 	private static ServicesFacade servicesFacadeInstance;
 
@@ -53,6 +55,7 @@ public class ServicesFacade {
 		else
 			new ServicesFacade();
 	}
+
 
 	private ServicesFacade() 
 			throws IOException 
@@ -107,12 +110,12 @@ public class ServicesFacade {
 		{
 			eventManager.registerListener(new ModifiedStateForConfigurationEventListener());
 			eventManager.registerListener(new ModifiedStateForUserInterfaceEventListener());
-
 			eventManager.registerListener(new ServerHierachyEventListener());
 			eventManager.registerListener(new SchemaEventListener());
 			eventManager.registerListener(new GroupsEventListener());
 			eventManager.registerListener(new TableEventListener());
-
+		}
+		{
 			styleManager.registerStyle(new LightStyleConfigurator());
 			styleManager.registerStyle(new DarkStyleConfigurator());
 			styleManager.registerStyle(new UnionStyleConfigurator());

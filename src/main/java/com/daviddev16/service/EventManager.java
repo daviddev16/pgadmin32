@@ -90,6 +90,4 @@ public final class EventManager implements Comparator<EventContextHolder> {
 		return eventListeners;
 	}
 
-
-
 }

@@ -4,6 +4,8 @@ import java.awt.Color;
 
 import javax.swing.UIManager;
 
+import com.daviddev16.util.Checks;
+
 public class CustomStylePropertiesHolder {
 
 	private final Color customInnerBackgroundColor;
@@ -15,7 +17,9 @@ public class CustomStylePropertiesHolder {
 	}
 	
 	private Color copyColor(final String uiColorKey) {
-		return new Color(UIManager.getColor(uiColorKey).getRGB());
+		final Color originalColor = UIManager.getColor(uiColorKey);
+		Checks.nonNull(originalColor, String.format("[color of %s]", uiColorKey));
+		return new Color(originalColor.getRGB());
 	}
 	
 	public Color getInnerBackgroundColor() {

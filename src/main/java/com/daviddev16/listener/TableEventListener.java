@@ -28,6 +28,7 @@ import com.daviddev16.core.data.TableProperty;
 import com.daviddev16.event.interaction.HandleCreateScriptRequestEvent;
 import com.daviddev16.event.interaction.HandleStatisticRequestEvent;
 import com.daviddev16.event.interaction.HandleTablePropertyRequestEvent;
+import com.daviddev16.event.server.ColumnNodeInteractEvent;
 import com.daviddev16.event.server.TableNodeInteractEvent;
 import com.daviddev16.node.Column;
 import com.daviddev16.node.Table;
@@ -41,6 +42,39 @@ public class TableEventListener implements EventListener {
 	
 	private final EventManager eventManager = ServicesFacade.getServices().getEventManager();
 
+	@EventHandler
+	public void onColumnNodeInteractEvent(ColumnNodeInteractEvent columnNodeInteractEvent) throws SQLException 
+	{
+		DefaultMutableTreeNode clickedNodeTree = columnNodeInteractEvent.getInteractedTreeNode();
+		//ServerTreeViewer serverTreeViewer = (ServerTreeViewer) columnNodeInteractEvent.getSender();
+		Column column = (Column) clickedNodeTree.getUserObject();
+
+		String alterCommand = 
+				"ALTER TABLE " + 
+				column.getPostgresObjectMetadata().getRelationNamespace() + "." + 
+				column.getPostgresObjectMetadata().getRelationName() + 
+				" ADD COLUMN " + column.getColumnName() + " ";
+		
+		String typeName = "";
+		if (column.getColumnTypeName().equals("character varying")) {
+			typeName = "VARCHAR";
+		} else {
+			typeName = column.getColumnTypeName();
+		}
+
+		if (typeName.equals("VARCHAR")) 
+		{
+			typeName = String.format("%s(%d)", typeName, column.getColumnDataTypeLength());
+		}
+		
+		alterCommand += typeName + " ";
+		
+		if (column.getColumnDefaultDefinition() != null)
+			alterCommand += " DEFAULT " + column.getColumnDefaultDefinition();
+		
+		eventManager.dispatchEvent(new HandleCreateScriptRequestEvent(this, alterCommand + ";"));
+	}
+	
 	/**
 	 * 
 	 * onInteractWithSchemaGroupNodeEvent faz o carregamento das tabelas do schema selecionado no
@@ -66,7 +100,7 @@ public class TableEventListener implements EventListener {
 			preparedStatement.setString(1, table.getTableName());
 			preparedStatement.setString(2, table.getPostgresObjectMetadata()
 					.getRelationNamespace());
-
+			
 			resultSet = preparedStatement.executeQuery();
 			Set<Column> columns = new LinkedHashSet<Column>();
 
@@ -90,8 +124,8 @@ public class TableEventListener implements EventListener {
 
 				EntityMetadata entityMetadata = new EntityMetadata();
 				entityMetadata.setRelationNamespace( table.getPostgresObjectMetadata().getRelationNamespace() );
+				entityMetadata.setRelationName( table.getPostgresObjectMetadata().getRelationName() );
 				entityMetadata.setParentRelationId( table.getPostgresObjectMetadata().getId() );
-				entityMetadata.setRelationName(columnName);
 				//postgresObjectMetadata.setOid(null); Colunas não tem OID
 
 				column.setPostgresObjectMetadata(entityMetadata);

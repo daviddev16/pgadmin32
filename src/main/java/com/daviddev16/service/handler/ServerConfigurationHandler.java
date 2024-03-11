@@ -16,7 +16,6 @@ public class ServerConfigurationHandler
 	@Override
 	public void createIfNecessary() throws IOException {
 		ServerConfiguration newServerConfiguration = new ServerConfiguration();
-		//newServerConfiguration.getServers().add(Server.LOCALHOST);
 		setHandledConfiguration(newServerConfiguration);
 		super.createIfNecessary();
 	}

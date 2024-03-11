@@ -98,8 +98,10 @@ public class FrmServerConnection extends JDialog {
 							
 							
 							ServicesFacade.getServices().getEventManager()
-								.dispatchEvent(new CreatedServerEvent(FrmServerConnection.this, server));							
+								.dispatchEvent(new CreatedServerEvent(FrmServerConnection.this, server));		
+							
 						} else if (server != null) {
+							
 							server.setServerName(txFdNmServidor.getInput());
 							server.setHost(txFdEnderecoHost.getInput());
 							server.setPassword(encryptedPassword);

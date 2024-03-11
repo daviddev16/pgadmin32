@@ -1,7 +1,9 @@
 package com.daviddev16.style;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.swing.LookAndFeel;
 
@@ -16,11 +18,15 @@ public final class DarkStyleConfigurator implements StyleConfigurator {
 	private LookAndFeel lookAndFeel;
 	
 	public DarkStyleConfigurator() {
+		FileInputStream fileInputStream = null;
+		try {
+			fileInputStream = new FileInputStream(new File("./resources/theme/syntax/monokai.xml"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		try {
 			lookAndFeel = new FlatMacDarkLaf();
-			InputStream inputStream = DarkStyleConfigurator.class
-					.getResourceAsStream("/com/daviddev16/themes/syntax/monokai.xml");
-			editorTheme = Theme.load(inputStream);
+			editorTheme = Theme.load(fileInputStream);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

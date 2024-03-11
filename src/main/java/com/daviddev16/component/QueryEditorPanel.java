@@ -95,7 +95,7 @@ public class QueryEditorPanel extends JPanel implements EventListener,
 		
 		tgBtnEnableUpperKeyword = new BorderlessToggleButton();
 		tgBtnEnableUpperKeyword.setPreferredSize(SwingUtil.DIMENSION_SQUARE_24);
-		tgBtnEnableUpperKeyword.setSelected(true);
+		tgBtnEnableUpperKeyword.setSelected(false);
 		tgBtnEnableUpperKeyword.setToolTipText("Identação com palavras-chave em caixa alta");
 
 		tgBtnEnableUpperKeyword.setIcon(ServicesFacade.getServices()

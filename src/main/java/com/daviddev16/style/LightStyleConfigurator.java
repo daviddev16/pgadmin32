@@ -1,7 +1,9 @@
 package com.daviddev16.style;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.swing.LookAndFeel;
 
@@ -16,11 +18,15 @@ public final class LightStyleConfigurator implements StyleConfigurator {
 	private LookAndFeel lookAndFeel;
 	
 	public LightStyleConfigurator() {
+		FileInputStream fileInputStream = null;
+		try {
+			fileInputStream = new FileInputStream(new File("./resources/theme/syntax/eclipse.xml"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		try {
 			lookAndFeel = new FlatMacLightLaf();
-			InputStream inputStream = LightStyleConfigurator.class
-					.getResourceAsStream("/com/daviddev16/themes/syntax/eclipse.xml");
-			editorTheme = Theme.load(inputStream);
+			editorTheme = Theme.load(fileInputStream);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

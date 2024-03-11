@@ -24,6 +24,7 @@ import com.daviddev16.core.ResourcedEntityDataNode;
 import com.daviddev16.core.component.TreeViewer;
 import com.daviddev16.core.component.event.TreeNodeInteractEvent;
 import com.daviddev16.core.component.event.TreeNodeInteractionType;
+import com.daviddev16.event.server.ColumnNodeInteractEvent;
 import com.daviddev16.event.server.ConstraintsGroupNodeInteractEvent;
 import com.daviddev16.event.server.DatabaseNodeInteractEvent;
 import com.daviddev16.event.server.IndexGroupNodeInteractEvent;
@@ -32,6 +33,7 @@ import com.daviddev16.event.server.SchemaNodeInteractEvent;
 import com.daviddev16.event.server.SequenceGroupNodeInteractEvent;
 import com.daviddev16.event.server.ServerNodeInteractEvent;
 import com.daviddev16.event.server.TableNodeInteractEvent;
+import com.daviddev16.node.Column;
 import com.daviddev16.node.Database;
 import com.daviddev16.node.Schema;
 import com.daviddev16.node.Server;
@@ -203,6 +205,10 @@ public class ServerTreeViewer extends TreeViewer {
 		else if (entityDataNode instanceof ConstraintsGroup) 
 			treeNodeInteractEvent = 
 				new ConstraintsGroupNodeInteractEvent(ServerTreeViewer.this, clickedTreeNode);
+		
+		else if (entityDataNode instanceof Column)
+			treeNodeInteractEvent =
+				new ColumnNodeInteractEvent(ServerTreeViewer.this, clickedTreeNode);
 		
 		/* objeto não foi mapeado / serve como um dummyObject */
 		if (treeNodeInteractEvent == null)
